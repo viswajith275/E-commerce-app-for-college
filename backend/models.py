@@ -1,6 +1,6 @@
-from sqlalchemy import Integer, String, ForeignKey, Enum
+from sqlalchemy import String, ForeignKey, Enum
 from sqlalchemy.orm import DeclarativeBase, relationship, Mapped, mapped_column
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from typing import List, Optional
 from datetime import datetime
 import enum
@@ -8,6 +8,20 @@ import re
 
 class Base(DeclarativeBase):
     pass
+
+class ItemStatus(enum.Enum):
+    ACTIVE = "ACTIVE"
+    SOLD = "SOLD"
+    WITHDRAWN = "WITHDRAWN"
+
+class BidStatus(enum.Enum):
+    PENDING = "PENDING"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
+
+class TransactionStatus(enum.Enum):
+    MEET_PENDING = "PENDING"
+    COMPLETED = "COMPLETED"
 
 #Base user model
 class UsersBase(BaseModel):
@@ -74,6 +88,7 @@ class UserCreate(BaseModel):
         return self
 
 
+
 #table structures
 
 #user table schemas
@@ -87,8 +102,9 @@ class User(Base):
     phone_no: Mapped[str] = mapped_column(unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     disabled: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow())
 
-    #relationship with teachers, class, timetables, tokens
+    #relationship with tokens
     tokens: Mapped[List["UserToken"]] = relationship(back_populates='user', cascade='all, delete-orphan')
 
 #User Token data dumping table (have to make a auto cleanup script to clear every week or so)
@@ -97,7 +113,9 @@ class UserToken(Base):
     __tablename__ = 'user_tokens'
 
     id: Mapped[int] = mapped_column(primary_key=True)
+
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+
     access_key: Mapped[Optional[str]] = mapped_column(nullable=True) #change when making access statable object
     refresh_key: Mapped[str] = mapped_column()
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow())
@@ -105,3 +123,72 @@ class UserToken(Base):
 
     user: Mapped['User'] = relationship(back_populates='tokens')
  
+class Item(Base):
+
+    __tablename__ = 'items'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    seller_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+
+    title: Mapped[str] = mapped_column(String(25), nullable=False)
+    description: Mapped[str] = mapped_column(String(120))
+    price: Mapped[float] = mapped_column(nullable=False)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow())
+
+    status: Mapped[ItemStatus] = mapped_column(Enum(ItemStatus), default=ItemStatus.ACTIVE)
+
+    #relationships with
+
+
+class ItemImage(Base):
+
+    __tablename__ = "item_images"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    item_id: Mapped[int] = mapped_column(ForeignKey('items.id'))
+
+    image_path: Mapped[str] = mapped_column()
+    is_primary: Mapped[bool] = mapped_column(default=False)
+
+    #relationship with
+
+
+class Bid(Base):
+
+    __tablename__ = "bids"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    item_id: Mapped[int] = mapped_column(ForeignKey('items.id'))
+    bider_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+
+    bid_price: Mapped[float] = mapped_column(nullable=False)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow())
+
+    status: Mapped[BidStatus] = mapped_column(default=BidStatus.PENDING)
+
+    #relationship with
+
+
+class Transaction(Base):
+
+    __tablename__ = "transactions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    item_id: Mapped[int] = mapped_column(ForeignKey('items.id'))
+    bid_id: Mapped[int] = mapped_column(ForeignKey('bids.id'))
+    seller_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    bider_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+
+    final_price: Mapped[float] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow())
+    status: Mapped[TransactionStatus] = mapped_column(default=TransactionStatus.MEET_PENDING)
+
+    #relationship with
+
+
+class Rating(Base):
+    pass
