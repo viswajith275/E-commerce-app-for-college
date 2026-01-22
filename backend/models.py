@@ -106,6 +106,8 @@ class User(Base):
 
     #relationship with tokens
     tokens: Mapped[List["UserToken"]] = relationship(back_populates='user', cascade='all, delete-orphan')
+    listed_items: Mapped[List["Item"]] = relationship(back_populates="seller", cascade="all, delete-orphan")
+    all_bids: Mapped[List["Bid"]] = relationship(back_populates='bider', cascade='all, delete-orphan')
 
 #User Token data dumping table (have to make a auto cleanup script to clear every week or so)
 class UserToken(Base):
@@ -140,6 +142,10 @@ class Item(Base):
 
     #relationships with
 
+    images: Mapped[List["ItemImage"]] = relationship(back_populates='item', cascade='all, delete-orphan')
+    seller: Mapped['User'] = relationship(back_populates='listed_items')
+    bids: Mapped[List['Bid']] = relationship(back_populates='item', cascade='all, delete-orphan')
+    transaction: Mapped["Transaction"] = relationship(back_populates='item', cascade='all, delete-orphan')
 
 class ItemImage(Base):
 
@@ -154,6 +160,7 @@ class ItemImage(Base):
 
     #relationship with
 
+    item: Mapped["Item"] = relationship(back_populates='images')
 
 class Bid(Base):
 
@@ -171,6 +178,8 @@ class Bid(Base):
 
     #relationship with
 
+    item: Mapped['Item'] = relationship(back_populates='bids')
+    bider: Mapped['User'] = relationship(back_populates='all_bids')
 
 class Transaction(Base):
 
@@ -189,6 +198,23 @@ class Transaction(Base):
 
     #relationship with
 
+    item: Mapped['Item'] = relationship(back_populates='transaction')
+    ratings: Mapped[List["Rating"]] = relationship(back_populates='transaction', cascade='all, delete-orphan')
+
 
 class Rating(Base):
-    pass
+    
+    __tablename__ = "ratings"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    trasaction_id: Mapped[int] = mapped_column(ForeignKey('transactions.id'))
+    rater_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    rated_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+
+    score: Mapped[int] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow())
+
+    #relationship with
+
+    transaction: Mapped["Transaction"] = relationship(back_populates='ratings')
