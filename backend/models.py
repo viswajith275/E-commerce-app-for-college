@@ -86,7 +86,13 @@ class UserCreate(BaseModel):
         if self.password != self.confirm_password:
             raise ValueError('Confirm password should be same as password!')
         return self
-
+    
+class BidBase(BaseModel):
+    id: int
+    bid_price: float
+    bider_id: int
+    username: str
+    rating: int
 
 class ItemBase(BaseModel):
     id: int
@@ -94,8 +100,11 @@ class ItemBase(BaseModel):
     title: str
     description: str
     price: float
+    primary_image: str
     images: List[str]
 
+class UniqueItemBase(ItemBase):
+    bids: List[BidBase]
 
 
 #table structures
@@ -111,6 +120,9 @@ class User(Base):
     phone_no: Mapped[str] = mapped_column(unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     disabled: Mapped[bool] = mapped_column(default=False)
+    rating_count: Mapped[int] = mapped_column(default=0)
+    total_rating: Mapped[int] = mapped_column(default=0)
+    rating: Mapped[float] = mapped_column(default=2.5)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow())
 
     #relationship with tokens
