@@ -5,6 +5,9 @@ from typing import List, Optional
 from datetime import datetime
 import enum
 import re
+from backend.config import MAX_IMAGE_SIZE
+
+ALLOWED_TYPES = ["image/jpeg", "image/png"]
 
 class Base(DeclarativeBase):
     pass
@@ -22,6 +25,26 @@ class BidStatus(enum.Enum):
 class TransactionStatus(enum.Enum):
     MEET_PENDING = "PENDING"
     COMPLETED = "COMPLETED"
+
+class ImageValidatorSchema(BaseModel):
+
+    filename: str
+    content_type: str
+    file_size: int
+
+    @field_validator('content_type')
+    @classmethod
+    def validate_file_type(cls, v):
+        if v not in ALLOWED_TYPES:
+            raise ValueError(f"File type '{v}' not allowed. Must be JPEG or PNG.")
+        return v
+
+    @field_validator('file_size')
+    @classmethod
+    def validate_size(cls, v):
+        if v > MAX_IMAGE_SIZE:
+            raise ValueError(f"File too large. Max size is {MAX_IMAGE_SIZE / 1024 / 1024}MB")
+        return v
 
 #Base user model
 class UsersBase(BaseModel):
@@ -93,6 +116,7 @@ class BidBase(BaseModel):
     bider_id: int
     username: str
     rating: int
+    status: BidStatus
 
 class ItemBase(BaseModel):
     id: int
@@ -102,6 +126,7 @@ class ItemBase(BaseModel):
     price: float
     primary_image: str
     images: List[str]
+    status: ItemStatus
 
 class UniqueItemBase(ItemBase):
     bids: List[BidBase]
