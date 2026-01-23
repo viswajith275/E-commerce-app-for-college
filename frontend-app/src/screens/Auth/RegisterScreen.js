@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, SafeAreaViewBase, TouchableOpacity, KeyboardAvo
 import { useForm,Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import api from '../../services/api'
 
 //Config
 const COLLEGE_DOMAIN = '@gectcr.ac.in'
@@ -24,12 +25,33 @@ const registerSchema = z.object({
     }
 ))
 
+const { control, handleSubmit, formState :{errors}} = useForm({
+    resolver: zodResolver(registerSchema)
+})
+
 
 export default function RegisterScreen({ navigation }){
     const [isLoading, setIsLoading] = useState(false);
 
     const onRegister = async() =>{
-
+        setIsLoading(true);
+        try{
+            
+            api.post("/register",{
+                email: data.email,
+                password: data.password,
+                username: data.fullname,
+                phone_no: data.phone_no
+            })
+            alert.Alert("Registered Successfully")
+        }
+        catch(error){
+            console.log(error);
+            alert.Alert("Error.Registering Failed");
+        }
+        finally{
+            setIsLoading(false)
+        }
     }
 
     return(
