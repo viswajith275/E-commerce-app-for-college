@@ -1,8 +1,10 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from .routes.Login import login_routes
 from backend.database import create_db_and_tables
-
+from backend.config import UPLOAD_DIRECTORY
 
 app = FastAPI()
 
@@ -11,6 +13,9 @@ app = FastAPI()
 @app.on_event('startup')
 def startup():
     create_db_and_tables()
+    os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+
+app.mount(path='/static', app=StaticFiles(directory='static'), name="static")
 
 origins = ["http://localhost:5173"]
 

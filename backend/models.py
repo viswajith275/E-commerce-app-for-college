@@ -88,6 +88,15 @@ class UserCreate(BaseModel):
         return self
 
 
+class ItemBase(BaseModel):
+    id: int
+    seller_id: int
+    title: str
+    description: str
+    price: float
+    images: List[str]
+
+
 
 #table structures
 
