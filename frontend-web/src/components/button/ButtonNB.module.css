@@ -1,0 +1,14 @@
+.btn{
+    padding: 0.5rem 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 #000;
+    border: 2px solid #000;
+
+    transition: all 0.1s ease;
+}
+
+.btn:active{
+    box-shadow: 0 0 0 #000;
+    transform: translateX(var(--shadow-offset));
+    transform: translateY(var(--shadow-offset));
+}
