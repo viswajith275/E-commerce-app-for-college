@@ -3,7 +3,8 @@
     border-radius: var(--border-radius);
     border: 2px solid #000;
 
-    gap: 0.8rem; /* Remove this */
+    gap: 1.2rem; /* Remove this */
+    justify-items: center;
 }
 
 .card3D{

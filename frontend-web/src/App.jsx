@@ -6,6 +6,7 @@ import Switch from './components/switch/Switch';
 import ProgressBar from './components/progressBar/ProgressBar';
 import ToolTipContainer from './components/toolTip/ToolTipContainer';
 import ToolTip from './components/toolTip/ToolTIp';
+import Loader from './components/loader/Loader';
 
 function App() {
 
@@ -25,7 +26,9 @@ function App() {
           Tool Tip Hover
 
           <ToolTip>Tool tip content</ToolTip>
-        </ToolTipContainer>
+        </ToolTipContainer> <br />
+
+        <Loader></Loader>
       </Card3D>
     </>
   )
