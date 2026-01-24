@@ -13,10 +13,11 @@ app = FastAPI()
 #starting the server and creating tables
 @app.on_event('startup')
 def startup():
-    abs_path = os.path.dirname(os.path.abspath(__file__))
-    new_path = os.path.join(abs_path, UPLOAD_DIRECTORY)
-    os.makedirs(new_path, exist_ok=True)
     create_db_and_tables()
+
+abs_path = os.path.dirname(os.path.abspath(__file__))
+new_path = os.path.join(abs_path, UPLOAD_DIRECTORY)
+os.makedirs(new_path, exist_ok=True)
 
 app.mount(path='/static', app=StaticFiles(directory='static'), name="static")
 

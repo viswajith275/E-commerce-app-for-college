@@ -2,7 +2,7 @@ from fastapi import APIRouter, status, HTTPException, UploadFile, Form, File, Qu
 from typing import List
 from backend.database import SessionDep
 from backend.oauth import UserDep
-from backend.utils import validate_and_save_image, delete_images
+from backend.utils import validate_image, delete_images, save_image
 from backend.models import Item, ItemBase, UniqueItemBase, ItemStatus, ItemImage
 
 item_routes = APIRouter(prefix='/items', tags=['Item_Paths'])
@@ -47,7 +47,7 @@ def Fetch_My_Items(current_user: UserDep, db: SessionDep, skip: int = Query(defa
 
     for item in items:
 
-        primary_photo_path = db.query(ItemImage).filter(ItemImage.is_primary == True, ItemImage.item_id == item.id).first()
+        primary_photo_path = db.query(ItemImage).filter(ItemImage.item_id == item.id, ItemImage.is_primary == True).first()
 
         result.append({
         'id': item.id,
@@ -94,7 +94,7 @@ def Fetch_One_Item(current_user: UserDep, db: SessionDep, id: int):
 
 
 @item_routes.post('/create')
-def Createt_Item(current_user: UserDep,
+async def Createt_Item(current_user: UserDep,
                 db: SessionDep,
                 title: str = Form(..., min_length=3, max_length=20),
                 price: float = Form(...),
@@ -111,27 +111,32 @@ def Createt_Item(current_user: UserDep,
     db.commit()
     db.refresh(new_item)
     
+    for file in images:
+        try:
+            await validate_image(file=file)
+        except:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please upload a images within the given constraints!")
+    
     for index, file in enumerate(images):
-
-        saved_image_path = validate_and_save_image(file=file)
-
-        new_image = ItemImage(item_id=new_item.id,
-                              image_path=saved_image_path,
-                              is_primary=(index==0)
-                              )
-        db.add(new_image)
-        db.commit()
+            
+            saved_image_path = await save_image(file)
+            new_image = ItemImage(item_id=new_item.id,
+                                    image_path=saved_image_path,
+                                    is_primary= index == 0
+                                    )
+            db.add(new_image)
+            db.commit()
 
     return {'message': 'Item created successfully!'}
 
 @item_routes.put('/{id}')
-def Update_Item(current_user: UserDep,
+async def Update_Item(current_user: UserDep,
                 db: SessionDep,
                 id: int,
                 title: str = Form(..., min_length=3, max_length=20),
                 price: float = Form(...),
                 description: str = Form(..., min_length=10, max_length=100),
-                images: List[UploadFile] = File(..., min_length=1, max_length=3)):
+                images: List[UploadFile] | None = File(..., min_length=1, max_length=3)):
     
     item = db.query(Item).filter(Item.id == id, Item.seller_id == current_user.id).first()
 
@@ -144,40 +149,52 @@ def Update_Item(current_user: UserDep,
     item.price = price
     item.description = description
 
-    prev_img_paths = [image.image_path[21::] for image in item.images] #have to change it cannot give a constant no to strip file path
+    if images is not None:
 
-    for path in prev_img_paths:
-        delete_images(path)
+        prev_img_paths = [image.image_path[22::] for image in item.images] #have to change it cannot give a constant no to strip file path
 
-    for image in item.images:
-        db.delete(image)
-    
-    db.commit()
+        for path in prev_img_paths:
+            await delete_images(path)
 
-    for index, file in enumerate(images):
+        for image in item.images:
+            db.delete(image)
+        
+        db.commit()
 
-        saved_image_path = validate_and_save_image(file=file)
-
-        new_image = ItemImage(item_id=item.id,
-                              image_path=saved_image_path,
-                              is_primary=(index==0)
-                              )
-        db.add(new_image)
-
-    db.commit()
-
+        for file in images:
+            try:
+                await validate_image(file=file)
+            except:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please upload a images within the given constraints!")
+        
+        for index, file in enumerate(images):
+                
+                saved_image_path = await save_image(file)
+                new_image = ItemImage(item_id=new_item.id,
+                                        image_path=saved_image_path,
+                                        is_primary= index == 0
+                                        )
+                db.add(new_image)
+                db.commit()
     return {'message': 'Item created successfully!'}
 
 
 @item_routes.delete('/{id}')
-def Delete_Item(current_user: UserDep, db: SessionDep, id: int):
+async def Delete_Item(current_user: UserDep, db: SessionDep, id: int):
 
     item = db.query(Item).filter(Item.id == id, Item.seller_id == current_user.id).first()
+    
 
     if not item:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No items found!')
     
+    prev_img_paths = [image.image_path[22::] for image in item.images] #have to change it cannot give a constant no to strip file path
+
+    for path in prev_img_paths:
+
+        await delete_images(path)
+
     db.delete(item)
     db.commit()
 
-    return {'message': 'successfully deleted the user!'}
+    return {'message': 'successfully deleted the item!'}
