@@ -5,7 +5,6 @@
 
 input[type=checkbox] {
     appearance: none;
-    background-color: transparent;
     position: relative;
     border-radius: 999px;
     cursor: pointer;
