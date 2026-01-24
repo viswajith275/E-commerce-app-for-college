@@ -1,0 +1,13 @@
+.container{
+    min-height: 1rem;
+    width: 100%;
+    border-radius: var(--border-radius);
+    border: 1px solid #000;
+    overflow: hidden;
+}
+
+.bar{
+    height: 100%;
+    border-right: 1px solid #000;
+    transition: all 1s ease-in-out;
+}

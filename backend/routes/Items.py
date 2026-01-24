@@ -3,7 +3,7 @@ from typing import List
 from backend.database import SessionDep
 from backend.oauth import UserDep
 from backend.utils import validate_image, delete_images, save_image
-from backend.models import Item, ItemBase, UniqueItemBase, ItemStatus, ItemImage
+from backend.models import Item, ItemBase, UniqueItemBase, ItemStatus, ItemImage, BidStatus
 
 item_routes = APIRouter(prefix='/items', tags=['Item_Paths'])
 
@@ -89,7 +89,7 @@ def Fetch_One_Item(current_user: UserDep, db: SessionDep, id: int):
             'username': bid.bider.username,
             'rating': bid.bider.rating,
             'status': bid.status
-        } for bid in item.bids]
+        } for bid in item.bids if bid.status != BidStatus.DELETED]
     }
 
 
@@ -176,7 +176,7 @@ async def Update_Item(current_user: UserDep,
                                         )
                 db.add(new_image)
                 db.commit()
-    return {'message': 'Item created successfully!'}
+    return {'message': 'Item updated successfully!'}
 
 
 @item_routes.delete('/{id}')

@@ -1,0 +1,43 @@
+.container{
+    position: relative;
+    display: inline-block;
+}
+
+.toolTip{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -120%);
+    padding: 0.5rem 2rem;
+    border-radius: var(--border-radius, 8px);
+    border: 2px solid #000;
+    background-color: #fff;
+    width: max-content;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s ease;
+    z-index: 1000;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toolTip.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -130%);
+}
+
+.toolTip::before{
+    content: "";
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    transform: translateX(-50%) rotate(45deg);
+    border-bottom: 2px solid #000;
+    border-right: 2px solid #000;
+    background-color: #fff;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+}
