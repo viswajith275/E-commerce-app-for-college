@@ -8,8 +8,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev &
 WORKDIR /app
 
 # Copy the build context into /app/backend so "backend" is a package root
-RUN mkdir -p /app/backend
+RUN mkdir -p /app/backend/static/images
+
+RUN ln -s /app/backend/static /app/static
+
 COPY . /app/backend
+
 
 RUN pip install --upgrade pip \
  && if [ -f /app/backend/requirements.txt ]; then pip install --no-cache-dir -r /app/backend/requirements.txt; fi \
