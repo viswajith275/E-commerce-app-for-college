@@ -1,0 +1,32 @@
+.switch {
+    --false: #aaa;
+    --true: #000;
+}
+
+input[type=checkbox] {
+    appearance: none;
+    background-color: transparent;
+    position: relative;
+    border-radius: 999px;
+    cursor: pointer;
+    border: 1px solid #000;
+}
+
+input[type=checkbox]::before {
+    content: '';
+    display: block;
+    height: 80%;
+    aspect-ratio: 1 / 1;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top: 50% ;
+    left: 25%;
+    background-color: var(--false);
+    border-radius: 999px;
+    transition: .3s ease;
+}
+
+input[type=checkbox]:checked::before {
+    background-color: var(--true);
+    left: 75%;
+}
