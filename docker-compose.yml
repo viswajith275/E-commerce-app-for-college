@@ -32,7 +32,7 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - image_data:/app/backend/static/images
+      - image_data:/app/static/images
     restart: on-failure
 
 volumes:
