@@ -1,5 +1,5 @@
 import React,{ useState } from 'react'
-import { Text, View, StyleSheet, SafeAreaViewBase, TouchableOpacity, KeyboardAvoidingView, Platform, TextInput, Alert  } from 'react-native'
+import { Text, View, StyleSheet, SafeAreaViewBase, TouchableOpacity, KeyboardAvoidingView, Platform, TextInput, Alert, ScrollView  } from 'react-native'
 import { useForm,Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -60,6 +60,13 @@ export default function RegisterScreen({ navigation }){
             behavior={Platform.OS == 'ios'? "padding":"height" }
             style={{flex:1}}
             >
+                <ScrollView>
+                    <Text>Create an Account</Text>
+                    
+                    <View>
+                        <Text>Username</Text>
+                    </View>
+                </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     )

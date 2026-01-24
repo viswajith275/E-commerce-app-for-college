@@ -4,7 +4,7 @@ import api from "../services/api";
 
 export const AuthContext = createContext();
 
-const AuthProvider = ({ children }) =>{
+export const AuthProvider = ({ children }) =>{
     [isLoading, setIsLoading] = useState(false);
     [user, setUser] = useState(null);
 
@@ -33,8 +33,15 @@ const AuthProvider = ({ children }) =>{
         setIsLoading(true);
 
         try{
+
+            const formData = new URLSearchParams();
+
+            formData.append("username",user_name);
+            formData.append("password",password);
             
-            await api.post("/login",{username:user_name,password:password})
+            await api.post("/login",formData.toString(),{
+                headers : { 'Content-Type' : 'application/x-www-form-urlencoded'}
+            })
             
             await checkLoggedIn();
         }
