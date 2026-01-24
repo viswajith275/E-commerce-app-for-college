@@ -4,6 +4,8 @@ import Button3D from './components/button/Button3D';
 import Button2D from './components/button/Button2D';
 import Switch from './components/switch/Switch';
 import ProgressBar from './components/progressBar/ProgressBar';
+import ToolTipContainer from './components/toolTip/ToolTipContainer';
+import ToolTip from './components/toolTip/ToolTIp';
 
 function App() {
 
@@ -18,6 +20,12 @@ function App() {
         <Switch size={18}></Switch>
 
         <ProgressBar progress={30} color={"grey"}></ProgressBar>
+
+        <ToolTipContainer>
+          Tool Tip Hover
+
+          <ToolTip>Tool tip content</ToolTip>
+        </ToolTipContainer>
       </Card3D>
     </>
   )
