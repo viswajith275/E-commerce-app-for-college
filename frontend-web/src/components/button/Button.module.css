@@ -1,14 +1,21 @@
-.btn{
+.btn2D, .btn3D{
     padding: 0.5rem 2rem;
     border-radius: var(--border-radius);
-    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 #000;
     border: 2px solid #000;
 
     transition: all 0.1s ease;
 }
 
-.btn:active{
+.btn3D{
+    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 #000;
+}
+
+.btn3D:active{
     box-shadow: 0 0 0 #000;
     transform: translateX(var(--shadow-offset));
     transform: translateY(var(--shadow-offset));
+}
+
+.btn2D:active{
+    opacity: 0.7;
 }
