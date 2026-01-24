@@ -121,6 +121,13 @@ class BidBase(BaseModel):
     rating: int
     status: BidStatus
 
+class BidCreate(BaseModel):
+    item_id: int
+    bid_price: float
+
+class BidUpdate(BaseModel):
+    bid_price: float
+
 class ItemBase(BaseModel):
     id: int
     seller_id: int
