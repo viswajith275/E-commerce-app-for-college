@@ -1,0 +1,11 @@
+.card3D{
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    border: 2px solid #000;
+
+    gap: 0.5rem;
+}
+
+.card3D{
+    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 #000;
+}
