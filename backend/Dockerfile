@@ -8,9 +8,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev &
 WORKDIR /app
 
 # Copy the build context into /app/backend so "backend" is a package root
-RUN mkdir -p /app/backend/static/images
+RUN mkdir -p /app/backend
 
-RUN ln -s /app/backend/static /app/static
+RUN mkdir -p /app/static/images
 
 COPY . /app/backend
 

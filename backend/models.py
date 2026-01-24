@@ -66,6 +66,9 @@ class UserCreate(BaseModel):
     @field_validator('username')
     @classmethod
     def username_validation(cls, u: str) -> str:
+        if len(u) < 3:
+            raise ValueError('Username cannot be smaller than 3 characters!')
+
         if ' ' in u:
             raise ValueError('Username cannot contain spaces')
         return u
