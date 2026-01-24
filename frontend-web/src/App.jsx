@@ -7,6 +7,7 @@ import ProgressBar from './components/progressBar/ProgressBar';
 import ToolTipContainer from './components/toolTip/ToolTipContainer';
 import ToolTip from './components/toolTip/ToolTIp';
 import Loader from './components/loader/Loader';
+import CheckBox from './components/checkBox/CheckBox';
 
 function App() {
 
@@ -28,7 +29,9 @@ function App() {
           <ToolTip>Tool tip content</ToolTip>
         </ToolTipContainer> <br />
 
-        <Loader></Loader>
+        <Loader></Loader> <br />
+
+        <CheckBox></CheckBox>
       </Card3D>
     </>
   )
