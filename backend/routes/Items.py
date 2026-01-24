@@ -170,7 +170,7 @@ async def Update_Item(current_user: UserDep,
         for index, file in enumerate(images):
                 
                 saved_image_path = await save_image(file)
-                new_image = ItemImage(item_id=new_item.id,
+                new_image = ItemImage(item_id=item.id,
                                         image_path=saved_image_path,
                                         is_primary= index == 0
                                         )
