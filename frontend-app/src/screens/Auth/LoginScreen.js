@@ -17,7 +17,7 @@ export default function LoginScreen({ navigation }){
     const handleLogin=async()=>{
 
         if(!username || !password){
-            alert.Alert("Both fields need to be filled")
+            Alert.alert("Both fields need to be filled")
             return;
         }
         
@@ -51,7 +51,7 @@ export default function LoginScreen({ navigation }){
                     <TouchableOpacity onPress={handleLogin} disabled={isLoading}>
                         <Text>{isLoading? 'Logging In': 'Log In'}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={()=>navigation.navigate(RegisterScreen)}>
+                    <TouchableOpacity onPress={()=>navigation.navigate("Register")}>
                         <Text>Don't have an account? <Text style={{fontWeight:'bold', color:'#007AFF'}}>Sign Up</Text></Text>
                     </TouchableOpacity>
                 </View>

@@ -5,8 +5,8 @@ import api from "../services/api";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) =>{
-    [isLoading, setIsLoading] = useState(false);
-    [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [user, setUser] = useState(null);
 
     const checkLoggedIn = async()=>{
 
@@ -29,14 +29,14 @@ export const AuthProvider = ({ children }) =>{
         checkLoggedIn();
     },[])
 
-    const login = async(user_name,password) =>{
+    const login = async(fullName,password) =>{
         setIsLoading(true);
 
         try{
 
             const formData = new URLSearchParams();
 
-            formData.append("username",user_name);
+            formData.append("username",fullName);
             formData.append("password",password);
             
             await api.post("/login",formData.toString(),{
