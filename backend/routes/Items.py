@@ -3,7 +3,7 @@ from typing import List
 from backend.database import SessionDep
 from backend.oauth import UserDep
 from backend.utils import validate_image, delete_images, save_image
-from backend.models import Item, ItemBase, UniqueItemBase, ItemStatus, ItemImage, BidStatus
+from backend.models import Item, ItemBase, UniqueItemBase, ItemStatus, ItemImage, BidStatus, Rating, RatingStatus
 
 item_routes = APIRouter(prefix='/items', tags=['Item_Paths'])
 
@@ -102,6 +102,12 @@ async def Createt_Item(current_user: UserDep,
                 description: str = Form(..., min_length=10, max_length=100),
                 images: List[UploadFile] = File(..., min_length=1, max_length=3)):
     
+    pending_rating = db.query(Rating).filter(Rating.rater_id == current_user.id, Rating.status == RatingStatus.PENDING).first()
+
+    if pending_rating:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Complete pending ratings to create a bid!")
+    
+    
     if price < 0:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The price should be greater than or equal to 0!")
 
@@ -140,6 +146,12 @@ async def Update_Item(current_user: UserDep,
                 price: float = Form(...),
                 description: str = Form(..., min_length=10, max_length=100),
                 images: List[UploadFile] | None = File(..., min_length=1, max_length=3)):
+    
+    pending_rating = db.query(Rating).filter(Rating.rater_id == current_user.id, Rating.status == RatingStatus.PENDING).first()
+
+    if pending_rating:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Complete pending ratings to create a bid!")
+    
     
     item = db.query(Item).filter(Item.id == id, Item.seller_id == current_user.id).first()
 

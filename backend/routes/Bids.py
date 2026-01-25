@@ -2,14 +2,15 @@ from fastapi import APIRouter, status, HTTPException, Query
 from typing import List
 from backend.database import SessionDep
 from backend.oauth import UserDep
-from backend.models import Bid, MyBidBase, BidStatus, BidCreate, Item, ItemStatus, BidUpdate
+from backend.models import Bid, MyBidBase, BidStatus, BidCreate, Item, ItemStatus, BidUpdate, Rating, RatingStatus
 
 bid_routes = APIRouter(prefix='/bids', tags=['Bid_Paths'])
 
 @bid_routes.get('/mybids', response_model=List[MyBidBase])
-def Fetch_My_Bids(current_user: UserDep,):
+def Fetch_My_Bids(current_user: UserDep, db: SessionDep, skip: int = Query(default=0, ge=0, description="No of bids to skip!"), limit: int = Query(default=10, ge=1, le=50, description="No of bids after skips")):
 
-    bids = current_user.all_bids
+    bids = db.query(Bid).filter(Bid.bider_id == current_user.id).order_by(Bid.created_at.desc()).offset(skip).limit(limit).all() #have to change the ordering to catagory or something with query variable
+
 
     if not bids:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No bids found!")
@@ -31,6 +32,11 @@ def Fetch_My_Bids(current_user: UserDep,):
 
 @bid_routes.post("/create")
 def Create_Bid(current_user: UserDep, db: SessionDep, bid_data: BidCreate):
+
+    pending_rating = db.query(Rating).filter(Rating.rater_id == current_user.id, Rating.status == RatingStatus.PENDING).first()
+
+    if pending_rating:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Complete pending ratings to create a bid!")
     
     item = db.query(Item).filter(Item.id == bid_data.item_id, Item.status == ItemStatus.ACTIVE).first()
 
@@ -55,6 +61,11 @@ def Create_Bid(current_user: UserDep, db: SessionDep, bid_data: BidCreate):
 
 @bid_routes.put('/{id}')
 def Update_Bid(current_user: UserDep, db: SessionDep, id: int, bid_data: BidUpdate):
+
+    pending_rating = db.query(Rating).filter(Rating.rater_id == current_user.id, Rating.status == RatingStatus.PENDING).first()
+
+    if pending_rating:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Complete pending ratings to create a bid!")
 
     bid = db.query(Bid).filter(Bid.id == id, Bid.bider_id == current_user.id, Bid.status == BidStatus.PENDING).first()
 

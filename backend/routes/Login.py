@@ -15,14 +15,14 @@ login_routes = APIRouter(tags=['Authentication'])
 #sigh up endpoint
 @login_routes.post('/register', response_model=UsersBase)
 def register_user(db: SessionDep, user: UserCreate, request: Request):
-    exists = db.query(User).filter(or_(User.username == user.username, User.email == user.email)).first()
+    exists = db.query(User).filter(or_(User.username == user.username, User.email == user.email, User.phone_no == user.phone_no)).first()
 
     #checking if the user exists
     if exists:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Username or email already registered!')
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Username or email or phoneno already registered!')
     
     hashed_pass = get_password_hash(user.password)
-    new_user = User(username=user.username, hashed_password=hashed_pass, email=user.email, phone_no=str(user.phone_no))
+    new_user = User(username=user.username, hashed_password=hashed_pass, email=user.email, phone_no=user.phone_no)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey, Enum
+from sqlalchemy import String, ForeignKey, Enum, or_
 from sqlalchemy.orm import DeclarativeBase, relationship, Mapped, mapped_column
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from typing import List, Optional
@@ -15,16 +15,20 @@ class Base(DeclarativeBase):
 class ItemStatus(enum.Enum):
     ACTIVE = "ACTIVE"
     SOLD = "SOLD"
-    WITHDRAWN = "WITHDRAWN"
-
+    
+    
 class BidStatus(enum.Enum):
     PENDING = "PENDING"
     ACCEPTED = "ACCEPTED"
     REJECTED = "REJECTED"
 
 class TransactionStatus(enum.Enum):
-    MEET_PENDING = "PENDING"
+    MEET_PENDING = "MEET_PENDING"
     COMPLETED = "COMPLETED"
+
+class RatingStatus(enum.Enum):
+    PENDING = "PENDING"
+    RATED = "RATED"
 
 class ImageValidatorSchema(BaseModel):
 
@@ -51,6 +55,7 @@ class UsersBase(BaseModel):
     username : str
     email: str
     phone_no: str
+    rating: float
     disabled : bool
 
     model_config = ConfigDict(from_attributes=True)
@@ -59,7 +64,7 @@ class UsersBase(BaseModel):
 class UserCreate(BaseModel):
     username : str
     email: str
-    phone_no: int
+    phone_no: str
     password : str
     confirm_password: str
 
@@ -82,10 +87,17 @@ class UserCreate(BaseModel):
     
     @field_validator('phone_no')
     @classmethod
-    def phone_no_validation(cls, p: int) -> int:
-        if len(str(p)) != 10:
+    def phone_no_validation(cls, p: str) -> str:
+        try:
+            p = str(int(p))
+
+            if len(p) != 10:
+                raise ValueError('This is not a valid phone number!')
+            
+            return p
+        except:
             raise ValueError('This is not a valid phone number!')
-        return p
+
         
     @field_validator('password')
     @classmethod
@@ -112,6 +124,21 @@ class UserCreate(BaseModel):
         if self.password != self.confirm_password:
             raise ValueError('Confirm password should be same as password!')
         return self
+    
+class TransactionBase(BaseModel):
+    seller_username: str
+    buyer_username: str
+    final_price: float
+    status: TransactionStatus
+
+class TransactionCreate(BaseModel):
+    item_id: int
+    bid_id: int
+
+class TransactionContact(BaseModel):
+    username: str
+    email: str
+    phone_no: str
     
 class MyBidBase(BaseModel):
     id: int
@@ -181,6 +208,8 @@ class User(Base):
     tokens: Mapped[List["UserToken"]] = relationship(back_populates='user', cascade='all, delete-orphan')
     listed_items: Mapped[List["Item"]] = relationship(back_populates="seller", cascade="all, delete-orphan")
     all_bids: Mapped[List["Bid"]] = relationship(back_populates='bider', cascade='all, delete-orphan')
+    selled_item_transactions: Mapped[List[Transaction]] = relationship(foreign_keys="[Transaction.seller_id]", back_populates='seller')
+    buyed_item_transactions: Mapped[List[Transaction]] = relationship(foreign_keys="[Transaction.bider_id]", back_populates='bider')
 
 #User Token data dumping table (have to make a auto cleanup script to clear every week or so)
 class UserToken(Base):
@@ -273,6 +302,9 @@ class Transaction(Base):
 
     item: Mapped['Item'] = relationship(back_populates='transaction')
     ratings: Mapped[List["Rating"]] = relationship(back_populates='transaction', cascade='all, delete-orphan')
+    seller: Mapped["User"] = relationship(foreign_keys=[seller_id], back_populates='selled_item_transactions')
+    bider: Mapped["User"] = relationship(foreign_keys=[bider_id], back_populates='buyed_item_transactions')
+
 
 
 class Rating(Base):
@@ -285,8 +317,9 @@ class Rating(Base):
     rater_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     rated_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
 
-    score: Mapped[int] = mapped_column()
+    score: Mapped[int] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow())
+    status: Mapped[RatingStatus] = mapped_column(default=RatingStatus.PENDING)
 
     #relationship with
 
