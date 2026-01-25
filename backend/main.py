@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from .routes.Login import login_routes
 from .routes.Items import item_routes
+from .routes.Bids import bid_routes
 from backend.database import create_db_and_tables
 from backend.config import UPLOAD_DIRECTORY
 
@@ -29,3 +30,4 @@ app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True
 #Adds all the end points to the application
 app.include_router(login_routes)
 app.include_router(item_routes)
+app.include_router(bid_routes)

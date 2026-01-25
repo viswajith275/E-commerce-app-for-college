@@ -113,20 +113,37 @@ class UserCreate(BaseModel):
             raise ValueError('Confirm password should be same as password!')
         return self
     
-class BidBase(BaseModel):
+class MyBidBase(BaseModel):
     id: int
     bid_price: float
-    bider_id: int
     username: str
-    rating: int
+    rating: float
     status: BidStatus
+    
+class BidBase(MyBidBase):
+    bider_id: int
+
 
 class BidCreate(BaseModel):
     item_id: int
     bid_price: float
 
+    @field_validator('bid_price')
+    @classmethod
+    def bid_price_validator(cls, p: float) -> float:
+        if p < 0:
+            raise ValueError("The price cannot be less than 0!")
+        return p
+
 class BidUpdate(BaseModel):
     bid_price: float
+
+    @field_validator('bid_price')
+    @classmethod
+    def bid_price_validator(cls, p: float) -> float:
+        if p < 0:
+            raise ValueError("The price cannot be less than 0!")
+        return p
 
 class ItemBase(BaseModel):
     id: int

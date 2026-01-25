@@ -86,10 +86,11 @@ def Fetch_One_Item(current_user: UserDep, db: SessionDep, id: int):
         'bids': [{
             'id': bid.id,
             'bid_price': bid.bid_price,
+            'bider_id': bid.bider_id,
             'username': bid.bider.username,
             'rating': bid.bider.rating,
             'status': bid.status
-        } for bid in item.bids if bid.status != BidStatus.DELETED]
+        } for bid in item.bids]
     }
 
 
@@ -101,6 +102,8 @@ async def Createt_Item(current_user: UserDep,
                 description: str = Form(..., min_length=10, max_length=100),
                 images: List[UploadFile] = File(..., min_length=1, max_length=3)):
     
+    if price < 0:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The price should be greater than or equal to 0!")
 
     new_item = Item(seller_id=current_user.id,
                     title=title,
