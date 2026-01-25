@@ -129,6 +129,7 @@ class RatingBase(BaseModel):
     id: int
     rated_username: str
     rated_score: int
+    rating_status: RatingStatus
 
 class RatingCreate(BaseModel):
     rating_id: int

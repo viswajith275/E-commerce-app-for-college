@@ -21,7 +21,26 @@ def Fetch_My_Ratings(current_user: UserDep, db: SessionDep):
         result.append({
             'id': rating.id,
             'rated_username': rating.rated_user.username,
-            'rated_score': rating.score
+            'rated_score': rating.score,
+            'rating_status': rating.status
+        })
+
+    return result
+
+@rating_routes.get('/mypending', response_model=List[RatingBase])
+def Fetch_My_Pending_Rating(current_user: UserDep, db: SessionDep):
+    ratings = db.query(Rating).filter(Rating.rater_id == current_user.id, Rating.status == RatingStatus.PENDING).all()
+
+    if not ratings:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No pending ratings found!")
+    
+    result = []
+    for rating in ratings:
+        result.append({
+            'id': rating.id,
+            'rated_username': rating.rated_user.username,
+            'rated_score': rating.score,
+            'rating_status': rating.status
         })
 
     return result
