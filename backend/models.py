@@ -125,6 +125,22 @@ class UserCreate(BaseModel):
             raise ValueError('Confirm password should be same as password!')
         return self
     
+class RatingBase(BaseModel):
+    id: int
+    rated_username: str
+    rated_score: int
+
+class RatingCreate(BaseModel):
+    rating_id: int
+    rated_score: int
+
+    @field_validator('rated_score')
+    @classmethod
+    def rated_score_validator(cls, s: int):
+        if s > 5 or s < 0:
+            raise ValueError("The score should be between 1 and 5")
+        return s
+
 class TransactionBase(BaseModel):
     seller_username: str
     buyer_username: str
@@ -210,6 +226,7 @@ class User(Base):
     all_bids: Mapped[List["Bid"]] = relationship(back_populates='bider', cascade='all, delete-orphan')
     selled_item_transactions: Mapped[List[Transaction]] = relationship(foreign_keys="[Transaction.seller_id]", back_populates='seller')
     buyed_item_transactions: Mapped[List[Transaction]] = relationship(foreign_keys="[Transaction.bider_id]", back_populates='bider')
+
 
 #User Token data dumping table (have to make a auto cleanup script to clear every week or so)
 class UserToken(Base):
@@ -324,3 +341,6 @@ class Rating(Base):
     #relationship with
 
     transaction: Mapped["Transaction"] = relationship(back_populates='ratings')
+    rater_user: Mapped["User"] = relationship(foreign_keys=[rater_id])
+    rated_user: Mapped["User"] = relationship(foreign_keys=[rated_id])
+
